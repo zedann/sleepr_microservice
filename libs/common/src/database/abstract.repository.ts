@@ -6,12 +6,10 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
   protected abstract readonly logger: Logger;
   constructor(protected readonly model: Model<TDocument>) {}
   async create(document: Omit<TDocument, '_id'>): Promise<TDocument> {
-    console.log('here3->', document);
     const createdDocument = new this.model({
       ...document,
       _id: new Types.ObjectId(),
     });
-    console.log('here4->', createdDocument);
 
     return (await createdDocument.save()).toJSON() as unknown as TDocument;
   }
