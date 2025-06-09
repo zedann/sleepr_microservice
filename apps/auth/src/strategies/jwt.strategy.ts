@@ -7,20 +7,25 @@ import { ConfigService } from '@nestjs/config';
 import { TokenPayload } from '../interfaces/token-payload.interface';
 
 @Injectable()
-export class JwtStartegy extends PassportStrategy(Strategy) {
+export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private readonly configService: ConfigService,
     private readonly userService: UsersService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
-        (request: Request) => request?.cookies?.Authentication,
+        // could be a request from express or RPC
+        (request: any) => {
+          console.log(request);
+          return request?.cookies?.Authentication || request?.Authentication;
+        },
       ]),
-      secretOrKey: configService.get<string>('JWT_SECRET', ''), // <--- fallback to empty string
+      secretOrKey: configService.get<string>('JWT_SECRET', ''),
     });
   }
 
   async validate({ userId: _id }: TokenPayload) {
+    console.log('JWT validate: userId', _id);
     return this.userService.getUser({ _id });
   }
 }

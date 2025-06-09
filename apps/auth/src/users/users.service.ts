@@ -42,7 +42,10 @@ export class UsersService {
     return user;
   }
   async getUser(getUserDto: GetUserDto) {
+    console.log('getUser called with:', getUserDto);
     const user = await this.userRepository.findOne(getUserDto);
+    console.log('getUser found:', user);
+
     if (!user)
       throw new NotFoundException(`user with id ${getUserDto._id} not exists`);
     return user;

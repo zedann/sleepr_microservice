@@ -2,12 +2,13 @@ import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UsersModule } from './users/users.module';
-import { LoggerModule } from '@app/common';
+import { AUTH_SERVICE, LoggerModule } from '@app/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as Joi from 'joi';
 import { LocalStrategy } from './strategies/local.startegy';
-import { JwtStartegy } from './strategies/jwt.strategy';
+import { JwtStrategy } from './strategies/jwt.strategy';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 @Module({
   imports: [
     UsersModule,
@@ -18,7 +19,8 @@ import { JwtStartegy } from './strategies/jwt.strategy';
         MONGODB_URI: Joi.string().required(),
         JWT_SECRET: Joi.string().required(),
         JWT_EXPIRATION: Joi.string().required(),
-        PORT: Joi.number().required(),
+        HTTP_PORT: Joi.number().required(),
+        TCP_PORT: Joi.number().required(),
       }),
     }),
     JwtModule.registerAsync({
@@ -31,8 +33,9 @@ import { JwtStartegy } from './strategies/jwt.strategy';
       }),
       inject: [ConfigService],
     }),
+    ClientsModule.register([{ name: AUTH_SERVICE, transport: Transport.TCP }]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStartegy],
+  providers: [AuthService, LocalStrategy, JwtStrategy],
 })
 export class AuthModule {}
